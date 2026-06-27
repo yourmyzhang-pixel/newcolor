@@ -4,7 +4,8 @@ const sharp = require('sharp');
 // ==========================================
 // ⚙️ โซนตั้งค่า (CONFIGURATION)
 // ==========================================
-const BOT_TOKEN = process.env.BOT_TOKEN; // บอทจะดึงรหัสผ่านจากระบบตั้งค่าของ Koyeb แทน
+// ระบบจะดึงรหัสผ่านจาก Environment Variables ของ Render เพื่อความปลอดภัย
+const BOT_TOKEN = process.env.BOT_TOKEN; 
 
 const CHANNEL_MAPPING = {
     // ห้องที่ 1: yellow updates (fake)
@@ -57,15 +58,15 @@ const CHANNEL_MAPPING = {
         topicLabel: ' .🎹 ⋮ 멤버 .ᐟ ֹ ₊',
         footer: '꒰ 🎨. black  ──★ ˙your time ̟   !!' 
     },
-    //  ห้องที่ 6: (เพิ่มใหม่ตรงนี้)
+    //  ห้องที่ 6
     '1520351981699338382': { 
         targetChannelId: '1520323284997115945', 
-        color: '#D8BFD8',                               // รหัสสีขอบประกาศ (ตัวอย่างเป็นสีม่วง เปลี่ยนได้ครับ)
-        title: '﹕ 𖥻﹒    🪻  purple update',           // หัวข้อประกาศของห้องที่ 6
+        color: '#D8BFD8', 
+        title: '﹕ 𖥻﹒    🪻  purple update', 
         thumbnail: 'https://cdn.discordapp.com/attachments/1520323215241777183/1520354275715448882/IMG_1172.jpg?ex=6a40e3c2&is=6a3f9242&hm=7a59f2a3d1bef9580faafc056501d580dcb1c43e7a148b1f9a245566499d1854',
-        description: 'new fake release ! ┆ ♡',          // คำบรรยายเนื้อหาหลัก
-        topicLabel: ' .🔮 ⋮ 멤버 .ᐟ ֹ ₊',               // ข้อความหัวข้อ Topic
-        footer: '꒰ 🎨. purple  ──★ ˙unit ̟   !!'   // ข้อความใต้ภาพสุด
+        description: 'new fake release ! ┆ ♡', 
+        topicLabel: ' .🔮 ⋮ 멤버 .ᐟ ֹ ₊', 
+        footer: '꒰ 🎨. purple  ──★ ˙unit ̟   !!' 
     }
 };
 
@@ -93,7 +94,7 @@ client.on('messageCreate', async (message) => {
     if (!config) return; 
 
     try {
-        // ข้ามระบบประกาศหากเป็นข้อความแรกตอนสร้างกระทู้ฟอรั่มใหม่ (ทำงานเฉพาะตอนคนมาคอมเมนต์แปะรูป)
+        // ข้ามระบบประกาศหากเป็นข้อความแรกตอนสร้างกระทู้ฟอรั่มใหม่
         if (message.id === message.channel.id) return;
 
         // ตรวจสอบรูปภาพในคอมเมนต์
@@ -119,7 +120,7 @@ client.on('messageCreate', async (message) => {
             .setTitle(config.title)                             
             .setThumbnail(config.thumbnail) 
             
-            // รายละเอียด: คำบรรยายหลัก -> หัวข้อที่ตั้งค่าไว้ -> ชื่อห้องกระทู้ -> ลิงก์วาร์ปภาษาอังกฤษ
+            // รายละเอียดประกาศ
             .setDescription(
                 `${config.description}\n` +
                 `**${config.topicLabel || 'Topic'}:** ${message.channel.name}\n\n` + 
@@ -139,6 +140,22 @@ client.on('messageCreate', async (message) => {
     } catch (error) {
         console.error('เกิดข้อผิดพลาดในการประมวลผลข้อความประกาศ:', error);
     }
+});
+
+// ==========================================
+// 🌐 ส่วนแก้ไขสำหรับ Render (Port Binding)
+// ==========================================
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => {
+    res.send('🤖 บอทประกาศอัปเดตของคุณรันอยู่ตลอด 24 ชั่วโมงแล้ว!');
+});
+
+// ดึงพอร์ตที่สุ่มจาก Render (process.env.PORT) เพื่อแก้บัค No open ports detected
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🌐 Web Server สำหรับปลุกบอทพร้อมทำงานแล้วที่พอร์ต ${PORT}`);
 });
 
 client.login(BOT_TOKEN);
